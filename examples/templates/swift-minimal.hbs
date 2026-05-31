@@ -1,0 +1,18 @@
+// {{generatedHeader}}
+import Foundation
+
+enum {{containerName}} {
+{{#each entries}}
+  {{#if isString}}
+    {{#if hasPlaceholders}}
+  static func {{apiName}}({{swiftParameters}}) -> String {
+    String(format: NSLocalizedString("{{key}}", comment: ""), {{swiftArguments}})
+  }
+    {{else}}
+  static var {{apiName}}: String {
+    NSLocalizedString("{{key}}", comment: "")
+  }
+    {{/if}}
+  {{/if}}
+{{/each}}
+}

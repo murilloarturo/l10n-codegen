@@ -11,6 +11,7 @@ Use this skill when a project uses `l10n-codegen` or asks for typed localization
 
 1. Find the config.
    - Prefer `l10n-codegen.config.yml`, `l10n-codegen.config.yaml`, or `l10n-codegen.config.json`.
+   - If there is no config, run `l10n-codegen init` for an interactive setup or `l10n-codegen init --defaults` for a starter file.
    - If the project uses Phrase, inspect `.phrase.yml` only to understand where Phrase pulls files. Do not read or expose tokens.
 
 2. Update source strings only.
@@ -22,6 +23,7 @@ Use this skill when a project uses `l10n-codegen` or asks for typed localization
 3. Regenerate.
    - Run `npm run build` if this repo is checked out from source.
    - Run `l10n-codegen generate --config <config>` or `node dist/cli.js generate --config <config>`.
+   - If an output uses `template:`, edit the referenced `.hbs` template instead of changing generated code.
 
 4. Verify.
    - Run the owning project's build or tests when available.
@@ -33,4 +35,5 @@ Use this skill when a project uses `l10n-codegen` or asks for typed localization
 - Preserve placeholder order and indexed placeholders such as `%1$s`.
 - For plurals, ensure the quantity parameter is first in generated Kotlin calls.
 - For string arrays, prefer native Android/Compose resources; Swift output may embed array values because Apple has no Android-style `string-array` runtime lookup.
+- Custom templates use Handlebars syntax such as `{{#each entries}}`, not SwiftGen Stencil.
 - Generated files should be deterministic and committed when the project commits generated code.

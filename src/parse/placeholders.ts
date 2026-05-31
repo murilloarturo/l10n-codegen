@@ -2,7 +2,7 @@ import type { Placeholder, PlaceholderType } from "../types.js";
 import { uniqueBy } from "../utils/text.js";
 
 const printfSpecifier =
-  /%((?<position>\d+)\$)?[-+# 0,(<]*(?:\d+|\*)?(?:\.(?:\d+|\*))?(?<length>hh|h|ll|l|L|z|t|j)?(?<kind>[@diuoxXfFeEgGaAcCsSp])/g;
+  /(?<!%)%((?<position>\d+)\$)?[-+# 0,(<]*(?:\d+|\*)?(?:\.(?:\d+|\*))?(?<length>hh|h|ll|l|L|z|t|j)?(?<kind>[@diuoxXfFeEgGaAcCsSp])/g;
 
 export function inferPlaceholders(value: string): Placeholder[] {
   const placeholders: Placeholder[] = [];

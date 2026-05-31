@@ -1,21 +1,8 @@
 #!/usr/bin/env node
-import { existsSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import process from "node:process";
 import { generateFromConfig } from "./config.js";
-
-const exampleConfig = `defaultLocale: en
-inputs:
-  - type: auto
-    path: Resources/en.lproj/Localizable.strings
-
-outputs:
-  - type: swift
-    path: Generated/L10n.swift
-    enumName: L10n
-    accessLevel: internal
-    bundle: Bundle.main
-`;
+import { runInitWizard, writeDefaultConfig } from "./initWizard.js";
 
 async function main(): Promise<void> {
   const [command, ...args] = process.argv.slice(2);
@@ -25,13 +12,14 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (command === "init") {
+  if (command === "init" || command === "wizard") {
     const configPath = option(args, "--config") ?? "l10n-codegen.config.yml";
-    if (existsSync(configPath)) {
-      throw new Error(`${configPath} already exists.`);
+    if (args.includes("--defaults") || args.includes("--no-interactive") || !process.stdin.isTTY) {
+      await writeDefaultConfig(configPath);
+      console.log(`Wrote ${configPath}`);
+    } else {
+      await runInitWizard(configPath);
     }
-    await writeFile(configPath, exampleConfig, "utf8");
-    console.log(`Wrote ${configPath}`);
     return;
   }
 
@@ -56,7 +44,8 @@ function printHelp(): void {
   console.log(`l10n-codegen
 
 Usage:
-  l10n-codegen init [--config l10n-codegen.config.yml]
+  l10n-codegen init [--config l10n-codegen.config.yml] [--defaults]
+  l10n-codegen wizard [--config l10n-codegen.config.yml]
   l10n-codegen generate [--config l10n-codegen.config.yml]
 `);
 }

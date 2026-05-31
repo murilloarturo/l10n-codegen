@@ -94,8 +94,8 @@ export function camelIdentifier(input: string, reserved: Set<string>, namespace?
   return result;
 }
 
-export function pascalIdentifier(input: string): string {
-  const camel = camelIdentifier(input, new Set());
+export function pascalIdentifier(input: string, namespace?: string): string {
+  const camel = camelIdentifier(input, new Set(), namespace);
   return camel.charAt(0).toUpperCase() + camel.slice(1);
 }
 
@@ -117,7 +117,14 @@ export function resourceIdentifier(input: string): string {
   return /^[0-9]/.test(safe) ? `_${safe}` : safe;
 }
 
-function stripNamespacePrefix(input: string, namespace: string | undefined): string {
+export function splitIdentifierPath(input: string, namespace: string | undefined, separator = "."): string[] {
+  const stripped = stripNamespacePrefix(input, namespace);
+  if (separator.length === 0) return [stripped];
+  const parts = stripped.split(separator).map((part) => part.trim()).filter(Boolean);
+  return parts.length > 0 ? parts : [stripped];
+}
+
+export function stripNamespacePrefix(input: string, namespace: string | undefined): string {
   if (!namespace) return input;
   const normalizedNamespace = namespace.replace(/[^A-Za-z0-9]+/g, "").toLowerCase();
   if (!normalizedNamespace) return input;

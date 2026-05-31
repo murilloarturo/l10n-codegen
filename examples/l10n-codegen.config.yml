@@ -15,8 +15,12 @@ outputs:
   - type: swift
     path: generated/swift/L10n.swift
     enumName: L10n
+    containerType: enum
+    symbolStyle: flat
     accessLevel: public
     bundle: Bundle.main
+    # Optional: use a custom Handlebars template instead of the built-in generator.
+    # template: templates/swift-minimal.hbs
   - type: kotlin-android
     path: generated/kotlin/android/L10n.kt
     packageName: com.example.l10n

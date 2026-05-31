@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generateKotlinAndroid, generateKotlinCompose, generateSwift } from "../src/index.js";
+import { generateKotlinAndroid, generateKotlinCompose, generateSwift, templateContext } from "../src/index.js";
 import type { LocalizationCatalog } from "../src/types.js";
 
 const catalog: LocalizationCatalog = {
@@ -34,6 +34,12 @@ const catalog: LocalizationCatalog = {
       kind: "string",
       value: "Namespaced key without separator",
       placeholders: []
+    },
+    {
+      key: "settings.title",
+      kind: "string",
+      value: "Settings",
+      placeholders: []
     }
   ]
 };
@@ -52,7 +58,23 @@ describe("generators", () => {
     expect(swift).toContain("public static var onboardingTips: [String]");
     expect(swift).toContain("public static var keyHere: String { tr(\"l10n.key_here\") }");
     expect(swift).toContain("public static var keyWithoutSeparator: String { tr(\"l10nkey_without_separator\") }");
+    expect(swift).toContain("guard !args.isEmpty else { return format.replacingOccurrences(of: \"%%\", with: \"%\") }");
     expect(swift).not.toContain("l10nKeyHere");
+  });
+
+  it("generates nested Swift accessors", () => {
+    const swift = generateSwift(catalog, {
+      type: "swift",
+      path: "L10n.swift",
+      enumName: "L10n",
+      accessLevel: "public",
+      symbolStyle: "nested",
+      nestingSeparator: "."
+    });
+
+    expect(swift).toContain("public enum Settings");
+    expect(swift).toContain("public static var title: String { tr(\"settings.title\") }");
+    expect(swift).toContain("public static var keyHere: String { tr(\"l10n.key_here\") }");
   });
 
   it("generates typed Kotlin Android wrappers", () => {
@@ -82,5 +104,16 @@ describe("generators", () => {
     expect(kotlin).toContain("stringResource(Res.string.greet_user, p1)");
     expect(kotlin).toContain("pluralStringResource(Res.plurals.photo_count, quantity, quantity)");
     expect(kotlin).toContain("public fun onboardingTips(): List<String>");
+  });
+
+  it("exposes simple template context for custom output templates", () => {
+    const context = templateContext(catalog, {
+      type: "swift",
+      path: "L10n.swift",
+      enumName: "L10n"
+    });
+
+    expect(context.entries.find((entry) => entry.key === "l10n.key_here")?.apiName).toBe("keyHere");
+    expect(context.entries.find((entry) => entry.key === "greet_user")?.swiftParameters).toBe("_ p1: String");
   });
 });

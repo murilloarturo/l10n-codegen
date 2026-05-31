@@ -69,6 +69,22 @@ Or after publishing:
 npx l10n-codegen generate --config l10n-codegen.config.yml
 ```
 
+## Wizard
+
+Create a config interactively:
+
+```sh
+l10n-codegen init
+```
+
+The wizard asks for the input file or glob, input type, output platform, output path, Swift enum/struct name, flat or nested Swift API, and optional custom output template.
+
+For a non-interactive starter config:
+
+```sh
+l10n-codegen init --defaults
+```
+
 ## Example config
 
 ```yaml
@@ -89,6 +105,8 @@ outputs:
   - type: swift
     path: examples/generated/swift/L10n.swift
     enumName: L10n
+    containerType: enum
+    symbolStyle: flat
     accessLevel: public
     bundle: Bundle.main
   - type: kotlin-android
@@ -100,6 +118,62 @@ outputs:
     packageName: com.example.l10n
     resImport: com.example.generated.resources.Res
 ```
+
+Swift output can use `symbolStyle: nested` when keys are namespaced:
+
+```yaml
+outputs:
+  - type: swift
+    path: Generated/L10n.swift
+    enumName: L10n
+    containerType: enum
+    symbolStyle: nested
+    nestingSeparator: "."
+```
+
+A key named `settings.title` then generates `L10n.Settings.title`.
+
+## Custom Templates
+
+Each output can use a custom Handlebars template with `template`.
+
+```yaml
+outputs:
+  - type: swift
+    path: Generated/L10n.swift
+    enumName: L10n
+    template: Templates/L10n.swift.hbs
+```
+
+Template syntax is intentionally small:
+
+```hbs
+// {{generatedHeader}}
+enum {{containerName}} {
+{{#each entries}}
+  {{#if isString}}
+  static var {{apiName}}: String {
+    NSLocalizedString("{{key}}", comment: "")
+  }
+  {{/if}}
+{{/each}}
+}
+```
+
+Common template values:
+
+- `output`: the output config block.
+- `containerName`: Swift enum/struct name or Kotlin object name with defaults applied.
+- `entries`: sorted localization entries.
+- `entry.key`: raw lookup key.
+- `entry.apiName`: generated method/property name.
+- `entry.resourceName`: Android/Compose resource name.
+- `entry.kind`: `string`, `plural`, or `array`.
+- `entry.placeholders`: inferred placeholders.
+- `entry.swiftParameters`, `entry.swiftArguments`.
+- `entry.kotlinParameters`, `entry.kotlinArguments`.
+
+See `examples/templates/swift-minimal.hbs` for a small Swift template.
 
 ## Project structure
 

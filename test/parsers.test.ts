@@ -10,6 +10,12 @@ describe("parsers", () => {
     expect(entries[0].placeholders.map((placeholder) => placeholder.type)).toEqual(["String", "Int"]);
   });
 
+  it("does not treat escaped percent text as a placeholder", () => {
+    const entries = parseAppleStrings('"progress" = "Progress 100%% complete";', "Localizable.strings");
+
+    expect(entries[0].placeholders).toEqual([]);
+  });
+
   it("parses Android plurals and arrays", () => {
     const entries = parseAndroidXml(
       `<resources>

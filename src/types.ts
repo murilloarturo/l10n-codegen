@@ -12,6 +12,10 @@ export type EntryKind = "string" | "plural" | "array";
 
 export type PlaceholderType = "String" | "Int" | "Long" | "Double" | "Boolean" | "Any";
 
+export type SwiftContainerType = "enum" | "struct";
+
+export type SwiftSymbolStyle = "flat" | "nested";
+
 export interface Placeholder {
   index: number;
   name: string;
@@ -52,9 +56,13 @@ export interface SwiftOutputConfig {
   type: "swift";
   path: string;
   enumName?: string;
+  containerType?: SwiftContainerType;
+  symbolStyle?: SwiftSymbolStyle;
+  nestingSeparator?: string;
   accessLevel?: "internal" | "public";
   bundle?: string;
   tableName?: string;
+  template?: string;
 }
 
 export interface KotlinAndroidOutputConfig {
@@ -63,6 +71,7 @@ export interface KotlinAndroidOutputConfig {
   packageName?: string;
   objectName?: string;
   rImport?: string;
+  template?: string;
 }
 
 export interface KotlinComposeOutputConfig {
@@ -71,6 +80,7 @@ export interface KotlinComposeOutputConfig {
   packageName?: string;
   objectName?: string;
   resImport?: string;
+  template?: string;
 }
 
 export type OutputConfig = SwiftOutputConfig | KotlinAndroidOutputConfig | KotlinComposeOutputConfig;

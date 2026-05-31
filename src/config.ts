@@ -5,6 +5,7 @@ import YAML from "yaml";
 import type { CodegenConfig, InputConfig, LocalizationCatalog, LocalizationEntry } from "./types.js";
 import { generateSwift } from "./generate/swift.js";
 import { generateKotlinAndroid, generateKotlinCompose } from "./generate/kotlin.js";
+import { renderCustomTemplate } from "./generate/templates.js";
 import { parseAndroidXml } from "./parse/androidXml.js";
 import { parseAppleStrings } from "./parse/appleStrings.js";
 import { parseAppleXcstrings } from "./parse/appleXcstrings.js";
@@ -29,8 +30,9 @@ export async function generateFromConfig(configPath: string): Promise<string[]> 
 
   for (const output of config.outputs) {
     const outputPath = path.resolve(baseDir, output.path);
-    const content =
-      output.type === "swift"
+    const content = output.template
+      ? await renderCustomTemplate(catalog, output, baseDir)
+      : output.type === "swift"
         ? generateSwift(catalog, output)
         : output.type === "kotlin-android"
           ? generateKotlinAndroid(catalog, output)
