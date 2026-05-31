@@ -1,0 +1,42 @@
+{
+  "name": "l10n-codegen",
+  "version": "0.1.0",
+  "description": "Typed localization code generation for Swift and Kotlin apps.",
+  "type": "module",
+  "bin": {
+    "l10n-codegen": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "generate": "node dist/cli.js generate --config examples/l10n-codegen.config.yml",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "localization",
+    "i18n",
+    "l10n",
+    "swift",
+    "kotlin",
+    "android",
+    "compose-multiplatform",
+    "xcstrings"
+  ],
+  "author": "Arturo Murillo",
+  "license": "MIT",
+  "dependencies": {
+    "fast-xml-parser": "^5.3.0",
+    "glob": "^13.0.0",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
+  }
+}

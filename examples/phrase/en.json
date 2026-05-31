@@ -1,0 +1,13 @@
+{
+  "paywall": {
+    "title": "Unlock everything",
+    "features": [
+      "Unlimited projects",
+      "Team sync"
+    ],
+    "trial_days": {
+      "one": "%d day left",
+      "other": "%d days left"
+    }
+  }
+}

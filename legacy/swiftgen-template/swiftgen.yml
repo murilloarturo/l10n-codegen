@@ -1,0 +1,36 @@
+# SwiftGen config for the typed-localization template.
+# Adjust input_dir / output_dir / inputs to your project layout, then run:
+#   swiftgen config run --config swiftgen.yml
+#
+# Paths below are relative to THIS file's directory.
+
+input_dir: ./Resources/Localizables
+output_dir: ./Generated
+
+strings:
+  inputs:
+    # Point at your DEVELOPMENT-language .strings file (used to derive keys + types).
+    - en.lproj/Localizable.strings
+  outputs:
+    templatePath: stringsTemplate.stencil
+    output: Localization.swift
+    params:
+      # Name of the generated key enum (e.g. `LocalizationKey.welcomeTitle`).
+      enumName: LocalizationKey
+
+      # Access level of the generated API.
+      #   true  -> public  (use when generating into a Swift Package / framework)
+      #   false -> internal (default for an app target)
+      publicAccess: true
+
+      # --- The only project-specific knob: which Bundle resolves the strings ---
+      # App target / framework:  omit this line  -> defaults to Bundle.main
+      # Swift Package (SPM):      bundle: Bundle.module
+      # Custom resource bundle:   bundle: MyResources.bundle  (any Bundle expression)
+      #
+      # bundle: Bundle.module
+
+      # --- Optional: non-default .strings table name ---
+      # Omit for Localizable.strings. Set to e.g. "Errors" for Errors.strings.
+      #
+      # tableName: Localizable

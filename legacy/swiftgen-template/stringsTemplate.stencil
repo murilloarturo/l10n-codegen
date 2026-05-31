@@ -1,0 +1,162 @@
+// Generated using SwiftGen — https://github.com/SwiftGen/SwiftGen
+// Typed Localization template — https://github.com/<your-org>/swiftgen-typed-localization
+// swiftlint:disable all
+
+{% if tables.count > 0 %}
+{% set accessModifier %}{% if param.publicAccess %}public{% else %}internal{% endif %}{% endset %}
+{# ---------------------------------------------------------------------------
+   Bundle decision (the only project-specific knob).
+   - App target / framework:  leave default -> Bundle.main
+   - Swift Package (SPM):     set `bundle: Bundle.module` in swiftgen.yml params
+   - Custom:                  set `bundle:` to any Swift expression returning a Bundle,
+                              e.g. `bundle: MyResources.bundle`
+--------------------------------------------------------------------------- #}
+{% set bundleExpression %}{{param.bundle|default:"Bundle.main"}}{% endset %}
+{# Optional .strings table name. Leave unset for Localizable.strings (table: nil). #}
+{% set tableExpression %}{% if param.tableName %}"{{param.tableName}}"{% else %}nil{% endif %}{% endset %}
+import Foundation
+
+// MARK: - Localization
+
+struct LocalizationModel {
+    let key: String
+    let values: [CVarArg]
+}
+
+{{accessModifier}} final class Localization {
+    {{accessModifier}} typealias LocalizeKey = (_ key: {{param.enumName|default:"L10n"}}) -> String
+
+    {{accessModifier}} class func localizeKey(_ key: {{param.enumName|default:"L10n"}}) -> String {
+        let keyValue = {{param.enumName|default:"L10n"}}.mapKey(key)
+        return localizeFromModel(.init(key: keyValue.0, values: keyValue.1))
+    }
+
+    private class func localizeFromModel(_ model: LocalizationModel) -> String {
+        let translation = {{bundleExpression}}.localizedString(
+            forKey: model.key,
+            value: model.key,
+            table: {{tableExpression}}
+        )
+
+        if !model.values.isEmpty {
+            // Guard: translations using a spaced percent ("% d", "% @", ...) are NOT
+            // format strings — return them verbatim instead of crashing String(format:).
+            let hasSpacedPercent = translation.contains("% d") ||
+                                  translation.contains("% s") ||
+                                  translation.contains("% @") ||
+                                  translation.contains("% f") ||
+                                  translation.contains("% i") ||
+                                  translation.contains("% u") ||
+                                  translation.contains("% x") ||
+                                  translation.contains("% X") ||
+                                  translation.contains("% o") ||
+                                  translation.contains("% c")
+
+            if hasSpacedPercent {
+                return translation
+            } else {
+                return String(format: translation, arguments: model.values)
+            }
+        } else {
+            return translation
+        }
+    }
+}
+
+// MARK: - Strings
+
+{% macro parametersBlock types %}
+  {%- for type in types -%}
+    {%- if type == "String" -%}
+    _ p{{forloop.counter}}: String
+    {%- else -%}
+    _ p{{forloop.counter}}: {{type}}
+    {%- endif -%}
+    {{ ", " if not forloop.last }}
+  {%- endfor -%}
+{% endmacro %}
+{% macro argumentsBlock types %}
+  {%- for type in types -%}
+    {%- if type == "String" -%}
+    String(describing: p{{forloop.counter}})
+    {%- elif type == "UnsafeRawPointer" -%}
+    Int(bitPattern: p{{forloop.counter}})
+    {%- else -%}
+    p{{forloop.counter}}
+    {%- endif -%}
+    {{ ", " if not forloop.last }}
+  {%- endfor -%}
+{% endmacro %}
+{% macro caseParametersBlock types %}
+  {%- for type in types -%}
+    let p{{forloop.counter}}{{ ", " if not forloop.last }}
+  {%- endfor -%}
+{% endmacro %}
+{% macro formatArguments types %}
+  {%- for type in types -%}
+    p{{forloop.counter}}{{ ", " if not forloop.last }}
+  {%- endfor -%}
+{% endmacro %}
+{% macro recursiveBlock table item %}
+  {% for string in item.strings %}
+  {% set translation string.translation|replace:'"','\"'|replace:'    ','\t' %}
+  {% if string.types %}
+    {% if translation|contains:"% d" or translation|contains:"% s" or translation|contains:"% @" or translation|contains:"% f" or translation|contains:"% i" or translation|contains:"% u" or translation|contains:"% x" or translation|contains:"% X" or translation|contains:"% o" or translation|contains:"% c" %}
+      case {{string.key|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}}
+    {% else %}
+      case {{string.key|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}}({% call parametersBlock string.types %})
+    {% endif %}
+  {% else %}
+    case {{string.key|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}}
+  {% endif %}
+  {% endfor %}
+  {% for child in item.children %}
+    {% call recursiveBlock table child %}
+  {% endfor %}
+{% endmacro %}
+{% macro recursiveMapperBlock table item %}
+  {% for string in item.strings %}
+  {% set translation string.translation|replace:'"','\"'|replace:'    ','\t' %}
+  {% if string.types %}
+    {% if translation|contains:"% d" or translation|contains:"% s" or translation|contains:"% @" or translation|contains:"% f" or translation|contains:"% i" or translation|contains:"% u" or translation|contains:"% x" or translation|contains:"% X" or translation|contains:"% o" or translation|contains:"% c" %}
+      case .{{string.key|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}}: ("{{string.key}}", [])
+    {% else %}
+      case .{{string.key|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}}({% call caseParametersBlock string.types %}): ("{{string.key}}", [{% call formatArguments string.types %}])
+    {% endif %}
+  {% else %}
+    case .{{string.key|swiftIdentifier:"pretty"|lowerFirstWord|escapeReservedKeywords}}: ("{{string.key}}", [])
+  {% endif %}
+  {% endfor %}
+  {% for child in item.children %}
+    {% call recursiveMapperBlock table child %}
+  {% endfor %}
+{% endmacro %}
+{% set enumName %}{{param.enumName|default:"L10n"}}{% endset %}
+{{accessModifier}} enum {{enumName}} {
+  {% if tables.count > 1 or param.forceFileNameEnum %}
+  {% for table in tables %}
+  {{accessModifier}} enum {{table.name|swiftIdentifier:"pretty"|escapeReservedKeywords}} {
+    {% filter indent:2," ",true %}{% call recursiveBlock table.name table.levels %}{% endfilter %}
+  }
+  {% endfor %}
+  {% else %}
+  {% call recursiveBlock tables.first.name tables.first.levels %}
+  {% endif %}
+}
+
+// MARK: - Implementation Details
+
+extension {{enumName}} {
+    static func mapKey(_ key: {{enumName}}) -> (String, [CVarArg]) {
+        switch key {
+        {% for table in tables %}
+        {% filter indent:4," ",true %}{% call recursiveMapperBlock table.name table.levels %}{% endfilter %}
+        {% endfor %}
+      }
+    }
+}
+
+// swiftlint:enable all
+{% else %}
+// No string found
+{% endif %}

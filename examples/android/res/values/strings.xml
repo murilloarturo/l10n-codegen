@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="download_status">Downloaded %1$d of %2$d files</string>
+    <plurals name="photo_count">
+        <item quantity="one">%d photo</item>
+        <item quantity="other">%d photos</item>
+    </plurals>
+    <string-array name="onboarding_tips">
+        <item>Sync projects</item>
+        <item>Review generated code</item>
+    </string-array>
+</resources>
