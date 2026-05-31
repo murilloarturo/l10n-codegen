@@ -1,5 +1,7 @@
 # l10n-codegen
 
+![l10n-codegen banner](assets/banner.png)
+
 Typed localization code generation for app projects.
 
 Status: prototype. The v0 scope is Swift plus Kotlin wrappers generated from existing localization files or Phrase-managed exports.
