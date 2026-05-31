@@ -73,8 +73,8 @@ const kotlinKeywords = new Set([
   "while"
 ]);
 
-export function camelIdentifier(input: string, reserved: Set<string>): string {
-  const words = input
+export function camelIdentifier(input: string, reserved: Set<string>, namespace?: string): string {
+  const words = stripNamespacePrefix(input, namespace)
     .replace(/['"]/g, "")
     .split(/[^A-Za-z0-9]+/)
     .filter(Boolean);
@@ -99,12 +99,12 @@ export function pascalIdentifier(input: string): string {
   return camel.charAt(0).toUpperCase() + camel.slice(1);
 }
 
-export function swiftIdentifier(input: string): string {
-  return camelIdentifier(input, swiftKeywords);
+export function swiftIdentifier(input: string, namespace?: string): string {
+  return camelIdentifier(input, swiftKeywords, namespace);
 }
 
-export function kotlinIdentifier(input: string): string {
-  return camelIdentifier(input, kotlinKeywords);
+export function kotlinIdentifier(input: string, namespace?: string): string {
+  return camelIdentifier(input, kotlinKeywords, namespace);
 }
 
 export function resourceIdentifier(input: string): string {
@@ -115,4 +115,23 @@ export function resourceIdentifier(input: string): string {
     .toLowerCase();
   const safe = result.length === 0 ? "value" : result;
   return /^[0-9]/.test(safe) ? `_${safe}` : safe;
+}
+
+function stripNamespacePrefix(input: string, namespace: string | undefined): string {
+  if (!namespace) return input;
+  const normalizedNamespace = namespace.replace(/[^A-Za-z0-9]+/g, "").toLowerCase();
+  if (!normalizedNamespace) return input;
+
+  const normalizedInput = input.replace(/[^A-Za-z0-9]+/g, "").toLowerCase();
+  if (!normalizedInput.startsWith(normalizedNamespace) || normalizedInput === normalizedNamespace) {
+    return input;
+  }
+
+  const prefixPattern = new RegExp(`^${escapeRegExp(normalizedNamespace)}[^A-Za-z0-9]*`, "i");
+  const stripped = input.replace(prefixPattern, "");
+  return stripped.length > 0 ? stripped : input;
+}
+
+function escapeRegExp(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

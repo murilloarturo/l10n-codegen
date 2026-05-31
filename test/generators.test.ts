@@ -22,6 +22,18 @@ const catalog: LocalizationCatalog = {
       kind: "array",
       items: ["One", "Two"],
       placeholders: []
+    },
+    {
+      key: "l10n.key_here",
+      kind: "string",
+      value: "Namespaced key",
+      placeholders: []
+    },
+    {
+      key: "l10nkey_without_separator",
+      kind: "string",
+      value: "Namespaced key without separator",
+      placeholders: []
     }
   ]
 };
@@ -38,6 +50,9 @@ describe("generators", () => {
     expect(swift).toContain("public static func greetUser(_ p1: String) -> String");
     expect(swift).toContain("public static func photoCount(_ quantity: Int) -> String");
     expect(swift).toContain("public static var onboardingTips: [String]");
+    expect(swift).toContain("public static var keyHere: String { tr(\"l10n.key_here\") }");
+    expect(swift).toContain("public static var keyWithoutSeparator: String { tr(\"l10nkey_without_separator\") }");
+    expect(swift).not.toContain("l10nKeyHere");
   });
 
   it("generates typed Kotlin Android wrappers", () => {
@@ -49,6 +64,7 @@ describe("generators", () => {
     });
 
     expect(kotlin).toContain("public fun greetUser(context: Context, p1: String): String");
+    expect(kotlin).toContain("public fun keyHere(context: Context): String = context.getString(R.string.l10n_key_here)");
     expect(kotlin).toContain("getQuantityString(R.plurals.photo_count, quantity, quantity)");
     expect(kotlin).toContain("getStringArray(R.array.onboarding_tips)");
   });
@@ -62,6 +78,7 @@ describe("generators", () => {
     });
 
     expect(kotlin).toContain("@Composable");
+    expect(kotlin).toContain("public fun keyHere(): String = stringResource(Res.string.l10n_key_here)");
     expect(kotlin).toContain("stringResource(Res.string.greet_user, p1)");
     expect(kotlin).toContain("pluralStringResource(Res.plurals.photo_count, quantity, quantity)");
     expect(kotlin).toContain("public fun onboardingTips(): List<String>");

@@ -24,7 +24,7 @@ export function generateKotlinAndroid(
   ].filter((line, index, array) => line !== "" || array[index - 1] !== "");
 
   for (const entry of entries) {
-    lines.push(...androidEntry(entry), "");
+    lines.push(...androidEntry(entry, objectName), "");
   }
 
   lines.push("}");
@@ -51,15 +51,15 @@ export function generateKotlinCompose(
   ].filter((line, index, array) => line !== "" || array[index - 1] !== "");
 
   for (const entry of entries) {
-    lines.push(...composeEntry(entry), "");
+    lines.push(...composeEntry(entry, objectName), "");
   }
 
   lines.push("}");
   return `${lines.join("\n")}\n`;
 }
 
-function androidEntry(entry: LocalizationEntry): string[] {
-  const name = kotlinIdentifier(entry.key);
+function androidEntry(entry: LocalizationEntry, objectName: string): string[] {
+  const name = kotlinIdentifier(entry.key, objectName);
   const resource = resourceIdentifier(entry.key);
 
   if (entry.kind === "array") {
@@ -88,8 +88,8 @@ function androidEntry(entry: LocalizationEntry): string[] {
   ];
 }
 
-function composeEntry(entry: LocalizationEntry): string[] {
-  const name = kotlinIdentifier(entry.key);
+function composeEntry(entry: LocalizationEntry, objectName: string): string[] {
+  const name = kotlinIdentifier(entry.key, objectName);
   const resource = resourceIdentifier(entry.key);
 
   if (entry.kind === "array") {

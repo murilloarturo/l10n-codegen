@@ -20,7 +20,7 @@ export function generateSwift(catalog: LocalizationCatalog, config: SwiftOutputC
   ];
 
   for (const entry of entries) {
-    lines.push(...swiftEntry(access, entry), "");
+    lines.push(...swiftEntry(access, entry, enumName), "");
   }
 
   lines.push(
@@ -35,8 +35,8 @@ export function generateSwift(catalog: LocalizationCatalog, config: SwiftOutputC
   return `${lines.join("\n")}\n`;
 }
 
-function swiftEntry(access: string, entry: LocalizationEntry): string[] {
-  const name = swiftIdentifier(entry.key);
+function swiftEntry(access: string, entry: LocalizationEntry, enumName: string): string[] {
+  const name = swiftIdentifier(entry.key, enumName);
   const key = escapeSwiftString(entry.key);
 
   if (entry.kind === "array") {

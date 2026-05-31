@@ -47,6 +47,8 @@ The source of truth is project-specific:
 
 Inputs can be mixed. The generator merges keys into one catalog and fails when the same key is used for incompatible resource kinds.
 
+Generated member names strip a duplicated wrapper namespace while preserving the raw resource key. For example, a key named `l10n.key_here` in an enum named `L10n` becomes `L10n.keyHere`, but still looks up `l10n.key_here` at runtime.
+
 ## Install
 
 ```sh
